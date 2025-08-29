@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Semester GPA & CGPA Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+       background: conic-gradient(from 0deg at 50% 50%, rgb(47, 23, 3), #db7d8e, #6a85ff, rgb(47, 23, 3), #ff6a88);
+      color: #333;
+    }
+    .container {
+      width: 90%; max-width: 950px;
+      margin: 20px auto; background: #fff;
+      padding: 20px; border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    h2, h3 { text-align: center; }
+    .tabs { display: flex; justify-content: center; margin-bottom: 20px; }
+    .tab-btn {
+      padding: 10px 20px; border: none;
+      cursor: pointer; background: #ccc;
+      margin: 0 5px; border-radius: 6px; font-weight: bolder;
+    }
+    .tab-btn.active { background: #2575fc; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input[type="text"], input[type="number"] {
+      width: 100%; padding: 8px; margin: 5px 0 12px;
+      border: 1px solid #ddd; border-radius: 6px;
+    }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-primary { background: #2575fc; color: white; }
+    .btn-secondary { background: #6a11cb; color: white; }
+    .btn:hover { opacity: 0.9; }
+    .result {
+      background: #f9f9f9;
+      padding: 15px; border-radius: 8px;
+      margin-top: 20px; overflow-x: auto;
+    }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 15px;
+    }
+    table th, table td {
+      border: 1px solid #ddd; padding: 8px; text-align: center;
+    }
+    table th { background: #2575fc; color: white; }
+    canvas { margin-top: 20px; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableResult, #printableResult * { visibility: visible; }
+      #printableResult { position: absolute; top: 0; left: 0; width: 100%; }
+    }
+     header {
+      background-color: rgba(201, 186, 186, 0.387);
+      box-shadow: 0 2px 10px rgba(155, 35, 35, 0.1);
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: rgb(47, 23, 3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      width: 40px;
+      height: auto;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #333333;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: rgb(47, 23, 3);
+    }
+
+    .btn {
+      background-color: rgb(47, 23, 3);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #5a3220;
+    }
+
+    /* Hero Section */
+    .hero {
+      background-image: url('IMG/gpa5.jpg');
+      padding: 80px 20px;
+      background-color: rgb(47, 23, 3);
+      color: white;
+      text-align: center;
+      position: relative;
+      height: 400px !important;
+    }
+
+    .hero-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .hero img {
+      width: 120px;
+      border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+        object-fit: cover;
+    }
+    
+
+    .center-text {
+      position: absolute;
+      color: white;
+      font-size: 90px;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+      top: 90%;
+      transform: translateY(-50%);
+    }
+  </style>
+</head>
+<body>
+     <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-calculator" viewBox="0 0 16 16">
+  <path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+  <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/>
+</svg>
+          <img src="IMG\gpa5.jpg" alt="Logo">
+          GPA CALCULATOR
+        </div>
+        <nav>
+          <ul>
+            <li><a href="Homepage.html#tools">Explore</a></li>
+            <li><a href="Homepage.html#features">About Us</a></li>
+            <li><a href="Hiw.html">Blog</a></li>
+            <li><a href="Homepage.html#SUPPORT">Support</a></li>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <h2>Student GPA & CGPA Calculator</h2>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('gpaTab')">Enter Semester</button>
+      <button class="tab-btn" onclick="showTab('cgpaTab')">CGPA</button>
+    </div>
+
+    <!-- GPA Tab -->
+    <div id="gpaTab" class="tab-content active">
+      <form id="gpaForm">
+        <label>Student Name</label>
+        <input type="text" id="student_name" required>
+
+        <label>Semester Number</label>
+        <input type="number" id="semester_number" min="1" required>
+
+        <div id="courses">
+          <div class="course-group">
+            <label>Course 1:</label>
+            <input type="text" name="code" placeholder="Course Code" required>
+            <input type="text" name="title" placeholder="Course Title" required>
+            <input type="number" name="credit" placeholder="Course Unit" min="1" required>
+            <input type="number" name="score" placeholder="Score (0-100)" min="0" max="100" required>
+          </div>
+        </div>
+
+        <button type="button" onclick="addCourse()" class="btn btn-secondary">+ Add Another Course</button>
+        <button type="submit" class="btn btn-primary">Save Semester GPA</button>
+      </form>
+      <div id="gpaResult" class="result" style="display:none;"></div>
+      <canvas id="gpaChart" style="max-height:350px;"></canvas>
+    </div>
+
+    <!-- CGPA Tab -->
+    <div id="cgpaTab" class="tab-content">
+      <div id="cgpaResult" class="result" style="display:none;"></div>
+      <canvas id="cgpaChart" style="margin-top:20px; max-height:400px;"></canvas>
+      <button onclick="calculateCGPA()" class="btn btn-primary">Calculate CGPA</button>
+      <button onclick="window.print()" class="btn btn-secondary">Print Result</button>
+    </div>
+  </div>
+
+  <script>
+    let semesters = [];
+    let gpaChart = null;
+    let cgpaChart = null;
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function addCourse() {
+      const courseCount = document.querySelectorAll('.course-group').length;
+      const newCourse = document.createElement('div');
+      newCourse.className = 'course-group';
+      newCourse.innerHTML = `
+        <label>Course ${courseCount + 1}:</label>
+        <input type="text" name="code" placeholder="Course Code" required>
+        <input type="text" name="title" placeholder="Course Title" required>
+        <input type="number" name="credit" placeholder="Course Unit" min="1" required>
+        <input type="number" name="score" placeholder="Score (0-100)" min="0" max="100" required>
+      `;
+      document.getElementById('courses').appendChild(newCourse);
+    }
+
+    function scoreToClassification(score) {
+      if (score >= 80) return "A - Distinction";
+      if (score >= 70) return "AB - Upper Credit";
+      if (score >= 60) return "B - Lower Credit";
+      if (score >= 50) return "BC - Pass";
+      if (score >= 40) return "C - Fail";
+      return "F - Fail";
+    }
+
+    function scoreToGradePoint(score) {
+      if (score >= 80) return 4.0;
+      if (score >= 70) return 3.5;
+      if (score >= 60) return 3.0;
+      if (score >= 50) return 2.5;
+      if (score >= 40) return 2.0;
+      return 0.0;
+    }
+
+    document.getElementById('gpaForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const studentName = document.getElementById('student_name').value;
+      const semesterNumber = parseInt(document.getElementById('semester_number').value);
+      const courses = document.querySelectorAll('.course-group');
+
+      let totalPoints = 0, totalCredits = 0;
+      let courseRows = "";
+      let courseLabels = [], courseScores = [];
+
+      courses.forEach(course => {
+        const code = course.querySelector('input[name="code"]').value;
+        const title = course.querySelector('input[name="title"]').value;
+        const credit = parseInt(course.querySelector('input[name="credit"]').value);
+        const score = parseInt(course.querySelector('input[name="score"]').value);
+        const gradePoint = scoreToGradePoint(score);
+        const classification = scoreToClassification(score);
+
+        totalPoints += gradePoint * credit;
+        totalCredits += credit;
+
+        courseRows += `
+          <tr>
+            <td>${code}</td>
+            <td>${title}</td>
+            <td>${credit}</td>
+            <td>${score}</td>
+            <td>${classification}</td>
+          </tr>`;
+
+        courseLabels.push(code);
+        courseScores.push(score);
+      });
+
+      if (totalCredits > 0) {
+        const gpa = (totalPoints / totalCredits).toFixed(2);
+
+        semesters.push({ studentName, semesterNumber, gpa, totalPoints, totalCredits, courseRows });
+
+        document.getElementById('gpaResult').style.display = 'block';
+        document.getElementById('gpaResult').innerHTML = `
+          <h3>Semester ${semesterNumber} Result</h3>
+          <strong>Student:</strong> ${studentName}<br><br>
+          <table>
+            <tr>
+              <th>Course Code</th>
+              <th>Course Title</th>
+              <th>Credit</th>
+              <th>Score</th>
+              <th>Final Degree</th>
+            </tr>
+            ${courseRows}
+          </table>
+          <p><b>Semester GPA:</b> ${gpa}</p>
+        `;
+
+        // --- Graph for GPA Semester ---
+        if (gpaChart) { gpaChart.destroy(); }
+        const ctx = document.getElementById('gpaChart').getContext('2d');
+        gpaChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: courseLabels,
+            datasets: [{
+              label: 'Scores',
+              data: courseScores,
+              backgroundColor: '#2575fc'
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, max: 100 } }
+          }
+        });
+
+        document.getElementById('gpaForm').reset();
+        document.getElementById('courses').innerHTML = `
+          <div class="course-group">
+            <label>Course 1:</label>
+            <input type="text" name="code" placeholder="Course Code" required>
+            <input type="text" name="title" placeholder="Course Title" required>
+            <input type="number" name="credit" placeholder="Course Unit" min="1" required>
+            <input type="number" name="score" placeholder="Score (0-100)" min="0" max="100" required>
+          </div>
+        `;
+      }
+    });
+
+    function calculateCGPA() {
+      if (semesters.length === 0) {
+        alert("No semester results recorded yet.");
+        return;
+      }
+
+      const studentName = semesters[0].studentName;
+      let totalPointsAll = 0, totalCreditsAll = 0;
+      let details = "";
+
+      semesters.forEach(sem => {
+        totalPointsAll += sem.totalPoints;
+        totalCreditsAll += sem.totalCredits;
+        details += `
+          <h4>Semester ${sem.semesterNumber} Result</h4>
+          <table>
+            <tr>
+              <th>Course Code</th>
+              <th>Course Title</th>
+              <th>Credit</th>
+              <th>Score</th>
+              <th>Final Degree</th>
+            </tr>
+            ${sem.courseRows}
+          </table>
+          <p><b>Semester GPA:</b> ${sem.gpa}</p><br>
+        `;
+      });
+
+      const cgpa = (totalPointsAll / totalCreditsAll).toFixed(2);
+
+      const report = `
+        <div id="printableResult">
+          <h3>Final CGPA Report</h3>
+          <strong>Student:</strong> ${studentName}<br><br>
+          ${details}
+          <p><b>Final CGPA:</b> ${cgpa}</p>
+        </div>
+      `;
+
+      document.getElementById('cgpaResult').innerHTML = report;
+      document.getElementById('cgpaResult').style.display = 'block';
+
+      // --- CGPA Graph ---
+      const labels = semesters.map(sem => `Sem ${sem.semesterNumber}`);
+      const gpas = semesters.map(sem => sem.gpa);
+
+      if (cgpaChart) { cgpaChart.destroy(); }
+      const ctx = document.getElementById('cgpaChart').getContext('2d');
+      cgpaChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'GPA per Semester',
+            data: gpas,
+            borderColor: '#2575fc',
+            backgroundColor: 'rgba(37,117,252,0.2)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 5,
+            pointBackgroundColor: '#6a11cb'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: 'GPA Progress Chart' }
+          },
+          scales: { y: { beginAtZero: true, max: 4 } }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
